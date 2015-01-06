@@ -39,6 +39,7 @@ class Renamer(QtGui.QMainWindow):
         cur_rate = main.get_rates()
         # while x <= finish:
         self.sineobj.addPoint(10, float(cur_rate['bid']))
+        self.sineobj.addPoint(15, float(cur_rate['bid']))
 
         #     self.coseobj.addPoint(x, math.cos(x))
         #     x += step
