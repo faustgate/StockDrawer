@@ -1,57 +1,72 @@
-#!/usr/bin/python
-# simple.py
-
 import sys
-import os
-import math
-import main
-import requests
-import time
-import json
-import execjs
-from PyQt4 import QtCore, QtGui, uic
-from PyKDE4.kdeui import KPushButton, KLineEdit, KPlotWidget, KTextBrowser, \
-    KPlotObject
+from PyQt4 import QtGui
+
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.dates import MinuteLocator
+import matplotlib.pyplot as plt
+import matplotlib.dates
+import datetime
+
+import random
 
 
-class Renamer(QtGui.QMainWindow):
+class Window(QtGui.QDialog):
     def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
+        super(Window, self).__init__(parent)
 
-        # widget.resize(250, 150)
-        # widget.setWindowTitle('simple')
-        uic.loadUi('graph.ui', self)
-        self.kplotwidget.setLimits(0, 20, 0, 20)
-        self.kplotwidget.axis(KPlotWidget.BottomAxis).setLabel(
-            'Angle in radians')
-        self.kplotwidget.axis(KPlotWidget.LeftAxis).setLabel(
-            'Angle in degress')
-        self.kplotwidget.setAntialiasing(True)
-        self.sineobj = KPlotObject(QtGui.QColor(10, 50, 255),
-                                   KPlotObject.Lines, 2)
-        self.coseobj = KPlotObject(QtGui.QColor(255, 50, 10),
-                                   KPlotObject.Lines, 2)
+        # a figure instance to plot on
+        self.figure = plt.figure()
 
-        start = 0
-        finish = 50
-        step = 0.001
-        x = start
-        cur_rate = main.get_rates()
-        # while x <= finish:
-        self.sineobj.addPoint(10, float(cur_rate['bid']))
-        self.sineobj.addPoint(15, float(cur_rate['bid']))
+        # this is the Canvas Widget that displays the `figure`
+        # it takes the `figure` instance as a parameter to __init__
+        self.canvas = FigureCanvas(self.figure)
 
-        #     self.coseobj.addPoint(x, math.cos(x))
-        #     x += step
+        # this is the Navigation widget
+        # it takes the Canvas widget and a parent
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        # Just some button connected to `plot` method
+        self.button = QtGui.QPushButton('Plot')
+        self.button.clicked.connect(self.plot)
+
+        # set the layout
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+        layout.addWidget(self.button)
+        self.setLayout(layout)
+
+    def plot(self):
+        ''' plot some random stuff '''
+        format_string = "%H:%M"
+        # random data
+        rand = [random.random()+1 for i in range(2)]
+        dates = ['10:00', '11:00']
+        for index, data in enumerate(dates):
+            dates[index] = datetime.datetime.strptime(data, "%H:%M")
+        dates_float = matplotlib.dates.date2num(dates)
+
+        # create an axis
+        ax = self.figure.add_subplot(111)
+
+        # discards the old graph
+        ax.hold(False)
+
+        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%H:%M"))
 
 
-        self.kplotwidget.addPlotObject(self.sineobj)
-        #self.kplotwidget.addPlotObject(self.coseobj)
-        self.kplotwidget.update()
+        # plot data
+        ax.plot_date(dates_float, rand, '*-')
+        plt.gcf().autofmt_xdate()
 
-app = QtGui.QApplication(sys.argv)
-renamer = Renamer()
-renamer.show()
-sys.exit(app.exec_())
+        # refresh canvas
+        self.canvas.draw()
 
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
 
+    main = Window()
+    main.show()
+
+    sys.exit(app.exec_())
