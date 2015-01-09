@@ -1,72 +1,105 @@
-import sys
-from PyQt4 import QtGui
+#!/usr/bin/python
+# simple.py
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+import sys
+import os
+import math
+import ua_cross_bank as uacb
+import requests
+import time
+import json
+import execjs
+import datetime as dt
+import random
+from PyQt4 import QtCore, QtGui, uic
+from PyKDE4.kdeui import KPushButton, KLineEdit, KPlotWidget, KTextBrowser, \
+    KPlotObject
+from matplotlib.backends.backend_qt4agg import \
+    FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import \
+    NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.dates import MinuteLocator
 import matplotlib.pyplot as plt
 import matplotlib.dates
-import datetime
+from matplotlib.figure import Figure
+import matplotlibwidget
 
-import random
 
-
-class Window(QtGui.QDialog):
+class Renamer(QtGui.QMainWindow):
     def __init__(self, parent=None):
-        super(Window, self).__init__(parent)
+        QtGui.QMainWindow.__init__(self, parent)
 
-        # a figure instance to plot on
-        self.figure = plt.figure()
-
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
-        self.canvas = FigureCanvas(self.figure)
-
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar(self.canvas, self)
-
-        # Just some button connected to `plot` method
-        self.button = QtGui.QPushButton('Plot')
-        self.button.clicked.connect(self.plot)
-
-        # set the layout
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.button)
-        self.setLayout(layout)
+        # widget.resize(250, 150)
+        # widget.setWindowTitle('simple')
+        uic.loadUi('graph.ui', self)
+        self.btn_Plot.clicked.connect(self.plot)
+        self.pB.clicked.connect(self.draw)
 
     def plot(self):
         ''' plot some random stuff '''
-        format_string = "%H:%M"
-        # random data
-        rand = [random.random()+1 for i in range(2)]
-        dates = ['10:00', '11:00']
-        for index, data in enumerate(dates):
-            dates[index] = datetime.datetime.strptime(data, "%H:%M")
-        dates_float = matplotlib.dates.date2num(dates)
+        # make up some data
+        x = [dt.datetime.now() + dt.timedelta(hours=i) for i in range(12)]
+        y = [i + random.gauss(0, 1) for i, _ in enumerate(x)]
 
-        # create an axis
-        ax = self.figure.add_subplot(111)
+        # plot
+        self.mplwidget.axes.plot(x, y)
+        # beautify the x-labels
+        self.mplwidget.figure.autofmt_xdate()
 
-        # discards the old graph
-        ax.hold(False)
-
-        ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%H:%M"))
-
-
-        # plot data
-        ax.plot_date(dates_float, rand, '*-')
-        plt.gcf().autofmt_xdate()
+        # plt.show()
+        self.mplwidget.axes.hold(False)
 
         # refresh canvas
-        self.canvas.draw()
+        self.mplwidget.draw()
 
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    def draw(self):
+        rates = uacb.get_rates()
+        today_rates = []
+        bid_rates = []
+        ask_rates = []
+        time_lines = []
+        for index in range(len(rates)-1, -1, -1):
+            try:
+                dt.datetime.strptime(rates[index]['date'], "%H:%M")
+            except ValueError:
+                break
+            else:
+                today_rates.append(rates[index])
 
-    main = Window()
-    main.show()
+        today_rates.reverse()
 
-    sys.exit(app.exec_())
+        for rate in today_rates:
+            bid_rates.append(rate['bid'])
+            ask_rates.append(rate['ask'])
+            time_lines.append(dt.datetime.strptime(rate['date'], "%H:%M"))
+        # make up some data
+        x = [dt.datetime.now() + dt.timedelta(hours=i) for i in range(12)]
+        y = [i + random.gauss(0, 1) for i, _ in enumerate(x)]
+
+        # plot
+
+        self.mplwidget_2.axes.cla()
+        self.mplwidget_2.axes.cla()
+        self.mplwidget_2.axes.hold(True)
+        ask = self.mplwidget_2.axes.plot(time_lines, ask_rates, '-b',
+                                         time_lines, bid_rates, '-r')
+
+        self.mplwidget_2.axes.set_title("USD")
+        self.mplwidget_2.axes.legend(ask, labels=['test', 'test2'])
+        self.mplwidget_2.figure.autofmt_xdate()
+
+        # plt.show()
+
+
+        # refresh canvas
+        self.mplwidget_2.draw()
+
+
+
+
+app = QtGui.QApplication(sys.argv)
+renamer = Renamer()
+renamer.show()
+sys.exit(app.exec_())
+
+
