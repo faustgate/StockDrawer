@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1102</width>
-    <height>821</height>
+    <height>877</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,9 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Tab 1</string>
@@ -25,16 +28,37 @@
         <item row="0" column="0">
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="MatplotlibWidget" name="mplwidget"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_1">
+            <item>
+             <widget class="MatplotlibWidget" name="mplwidget"/>
+            </item>
+            <item>
+             <widget class="MatplotlibWidget" name="mplwidget_2"/>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="MatplotlibWidget" name="mplwidget_2"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="MatplotlibWidget" name="mplwidget_3"/>
+            </item>
+            <item>
+             <widget class="MatplotlibWidget" name="mplwidget_4"/>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="MatplotlibWidget" name="mplwidget_3"/>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="MatplotlibWidget" name="mplwidget_5"/>
+            </item>
+            <item>
+             <widget class="MatplotlibWidget" name="mplwidget_6"/>
+            </item>
+           </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QPushButton" name="btn_Plot">
               <property name="text">
@@ -44,6 +68,13 @@
             </item>
             <item>
              <widget class="QPushButton" name="pB">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
               <property name="text">
                <string>PushButton</string>
               </property>
@@ -73,8 +104,44 @@
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionRedraw"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionRedraw">
+   <property name="text">
+    <string>Redraw</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
