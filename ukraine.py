@@ -6,7 +6,7 @@ import re
 
 def get_rates():
     last_rates = {}
-    currencys = ['usd', 'eur', 'rub']
+    currencies = ['usd', 'eur', 'rub']
     fn_tpl = """
     function get_stock_rates(){
     stock_rates = 0
@@ -28,7 +28,7 @@ def get_rates():
                                 '/div/div[4]/div[@class="mb-graph clear"]'
                                 '/div[@class="t-mrg fl goat-attack"]'
                                 '/script')}
-    for cur in currencys:
+    for cur in currencies:
         req = requests.get('http://minfin.com.ua/currency/mb/' + cur).content
         for query in xpath_queries:
             res_key = '{0}_{1}'.format(cur, query)

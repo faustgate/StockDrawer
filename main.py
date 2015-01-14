@@ -35,7 +35,7 @@ class Renamer(QtGui.QMainWindow):
         uic.loadUi('graph.ui', self)
         self.btn_Plot.clicked.connect(self.plot)
         #self.pB.clicked.connect(self.draw_cross)
-        self.pushButton.clicked.connect(self.draw_dollar)
+        self.pushButton.clicked.connect(self.draw_ukraine)
         self.today = dt.datetime.now()
 
     def plot(self):
@@ -95,12 +95,12 @@ class Renamer(QtGui.QMainWindow):
         # refresh canvas
         widget.draw()
 
-    def draw_dollar(self):
+    def draw_ukraine(self):
         rates = ukraine.get_rates()
         for key in rates:
             widget_name = getattr(self, key)
             self.draw(widget_name, rates[key], key.replace('_', " ").upper())
-        Timer(5.0, self.draw_dollar).start()
+        Timer(60.0, self.draw_ukraine).start()
 
 app = QtGui.QApplication(sys.argv)
 renamer = Renamer()
