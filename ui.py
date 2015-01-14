@@ -4,8 +4,8 @@
 import sys
 import os
 import math
-import ua_cross_bank as uacb
-import ua_market as uam
+from threading import Timer
+import ukraine
 import requests
 import time
 import json
@@ -34,20 +34,20 @@ class Renamer(QtGui.QMainWindow):
         # widget.setWindowTitle('simple')
         uic.loadUi('graph.ui', self)
         self.btn_Plot.clicked.connect(self.plot)
-        self.pB.clicked.connect(self.draw_cross)
-        self.pushButton.clicked.connect(self.draw_market)
+        #self.pB.clicked.connect(self.draw_cross)
+        self.pushButton.clicked.connect(self.draw_dollar)
         self.today = dt.datetime.now()
 
     def plot(self):
         ''' plot some random stuff '''
         # make up some data
-        x = [dt.datetime.now() + dt.timedelta(hours=i) for i in range(12)]
+        x = [dt.datetime.now() + dt.timedelta(hours=i) for i in range(4)]
         y = [i + random.gauss(0, 1) for i, _ in enumerate(x)]
 
         # plot
         self.mplwidget.axes.plot(x, y)
         # beautify the x-labels
-        self.mplwidget.figure.autofmt_xdate()
+        self.mplwidget.figure.autofmt_xdate(hspace=5)
 
         # plt.show()
         self.mplwidget.axes.hold(False)
@@ -55,36 +55,18 @@ class Renamer(QtGui.QMainWindow):
         # refresh canvas
         self.mplwidget.draw()
 
-    def draw_graph(self, widget):
-
-        self.mplwidget_2.axes.cla()
-        self.mplwidget_2.axes.hold(True)
-        self.mplwidget_2.axes.grid(True)
-
-        ask = self.mplwidget_2.axes.plot_date(time_lines, ask_rates, '-b')
-        ask = self.mplwidget_2.axes.plot_date(time_lines, bid_rates, '-r')
-        #self.mplwidget_2.figure.autofmt_xdate()
-        self.mplwidget_2.axes.set_title("USD")
-        self.mplwidget_2.axes.legend(ask, labels=['test', 'test2'])
-
-        # plt.show()
-
-        # refresh canvas
-        self.mplwidget_2.draw()
-
-    def draw_market(self):
-        rates = uam.get_rates()
+    def parse(self, source):
         today_rates = []
         bid_rates = []
         ask_rates = []
         time_lines = []
-        for index in range(len(rates)-1, -1, -1):
+        for index in range(len(source)-1, -1, -1):
             try:
-                dt.datetime.strptime(rates[index]['date'], "%H:%M")
+                dt.datetime.strptime(source[index]['date'], "%H:%M")
             except ValueError:
                 break
             else:
-                today_rates.append(rates[index])
+                today_rates.append(source[index])
 
         today_rates.reverse()
 
@@ -94,58 +76,31 @@ class Renamer(QtGui.QMainWindow):
             rate_time = dt.datetime.strptime(rate['date'], "%H:%M")
             time_lines.append(self.today.replace(hour=rate_time.hour,
                                                  minute=rate_time.minute))
-        self.mplwidget_2.axes.cla()
-        self.mplwidget_2.axes.hold(True)
-        self.mplwidget_2.axes.grid(True)
+        return bid_rates, ask_rates, time_lines
 
-        ask = self.mplwidget_2.axes.plot_date(time_lines, ask_rates, '-b')
-        ask = self.mplwidget_2.axes.plot_date(time_lines, bid_rates, '-r')
+    def draw(self, widget, source_date, title):
+        bid_rates, ask_rates, time_lines = self.parse(source_date)
+        widget.axes.cla()
+        widget.axes.hold(True)
+        widget.axes.grid(True)
+
+        ask = widget.axes.plot_date(time_lines, ask_rates, '-b')
+        ask = widget.axes.plot_date(time_lines, bid_rates, '-r')
         #self.mplwidget_2.figure.autofmt_xdate()
-        self.mplwidget_2.axes.set_title("USD")
-        self.mplwidget_2.axes.legend(ask, labels=['test', 'test2'])
+        widget.axes.set_title(title)
+        widget.axes.legend(ask, labels=['test', 'test2'])
 
         # plt.show()
 
         # refresh canvas
-        self.mplwidget_2.draw()
+        widget.draw()
 
-    def draw_cross(self):
-        rates = uacb.get_rates()
-        today_rates = []
-        bid_rates = []
-        ask_rates = []
-        time_lines = []
-        for index in range(len(rates)-1, -1, -1):
-            try:
-                dt.datetime.strptime(rates[index]['date'], "%H:%M")
-            except ValueError:
-                break
-            else:
-                today_rates.append(rates[index])
-
-        today_rates.reverse()
-
-        for rate in today_rates:
-            bid_rates.append(rate['bid'])
-            ask_rates.append(rate['ask'])
-            rate_time = dt.datetime.strptime(rate['date'], "%H:%M")
-            time_lines.append(self.today.replace(hour=rate_time.hour,
-                                                 minute=rate_time.minute))
-
-        self.mplwidget.axes.cla()
-        self.mplwidget.axes.hold(True)
-        self.mplwidget.axes.grid(True)
-
-        ask = self.mplwidget.axes.plot_date(time_lines, ask_rates, '-b')
-        ask = self.mplwidget.axes.plot_date(time_lines, bid_rates, '-r')
-        #self.mplwidget_2.figure.autofmt_xdate()
-        self.mplwidget.axes.set_title("USD")
-        self.mplwidget.axes.legend(ask, labels=['test', 'test2'])
-
-        # plt.show()
-
-        # refresh canvas
-        self.mplwidget.draw()
+    def draw_dollar(self):
+        rates = ukraine.get_rates()
+        for key in rates:
+            widget_name = getattr(self, key)
+            self.draw(widget_name, rates[key], key.replace('_', " ").upper())
+        Timer(5.0, self.draw_dollar).start()
 
 app = QtGui.QApplication(sys.argv)
 renamer = Renamer()

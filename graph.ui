@@ -28,32 +28,32 @@
         <item row="0" column="0">
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_1">
+           <layout class="QHBoxLayout" name="USD">
             <item>
-             <widget class="MatplotlibWidget" name="mplwidget"/>
+             <widget class="MatplotlibWidget" name="usd_cross"/>
             </item>
             <item>
-             <widget class="MatplotlibWidget" name="mplwidget_2"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="MatplotlibWidget" name="mplwidget_3"/>
-            </item>
-            <item>
-             <widget class="MatplotlibWidget" name="mplwidget_4"/>
+             <widget class="MatplotlibWidget" name="usd_market"/>
             </item>
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QHBoxLayout" name="EURO">
             <item>
-             <widget class="MatplotlibWidget" name="mplwidget_5"/>
+             <widget class="MatplotlibWidget" name="eur_cross"/>
             </item>
             <item>
-             <widget class="MatplotlibWidget" name="mplwidget_6"/>
+             <widget class="MatplotlibWidget" name="eur_market"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="RUB">
+            <item>
+             <widget class="MatplotlibWidget" name="rub_cross"/>
+            </item>
+            <item>
+             <widget class="MatplotlibWidget" name="rub_market"/>
             </item>
            </layout>
           </item>
